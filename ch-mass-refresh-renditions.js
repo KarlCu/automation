@@ -1,10 +1,11 @@
 // Open the assets landing page before running this script
-// 		https://contenthub-staging.mecca.com/en-us/Assets
+//   https://contenthub-staging.mecca.com/en-us/Assets
 // Sorting: Date modified - ascending (oldest to latest)
 // Filter: 
-//		Asset media: Images; Vectors
+//   Asset media: Images; Vectors
 // To execute, type in console: runAutomation({total_number_of_assets}, {number_of_seconds_before_start})
-//		Example: runAutomation(300, 2)
+//   Example: initAutomation(29653, 5)
+
 function clearSelection() {
   console.log("clearSelection()");
   var btn = document.querySelector('[data-testid="clear-selection"]');
@@ -55,7 +56,9 @@ function untoggleRefreshFailedOnly() {
 
 function submit() {
   console.log("clickRefreshRenditions()");
-  var btn = document.querySelector('[data-bind="click: cancel, text: messages.cancel"]');
+  // For testing: 
+  // var btn = document.querySelector('[data-bind="click: cancel, text: messages.cancel"]');
+  var btn = document.getElementsByClassName('btn-primary');
   if (btn) {
     btn.click();
   }
@@ -112,8 +115,6 @@ var keyTotalAssets = "ch-refresh-renditions-total-assets";
 var keyCounter = "ch-refresh-renditions-counter";
 var keyStartsInSeconds = "ch-refresh-renditions-starts-in-seconds";
 
-var counter = sessionStorage.getItem(keyCounter);
-
 function runAutomation(totalAssets, startsInSeconds) {
   var totalExecution = Math.ceil(totalAssets / 2000) + 1; // add extra 1
 
@@ -123,19 +124,24 @@ function runAutomation(totalAssets, startsInSeconds) {
 
   sessionStorage.setItem(keyTotalAssets, totalAssets);
   sessionStorage.setItem(keyStartsInSeconds, startsInSeconds);
+  
+  var counter = sessionStorage.getItem(keyCounter);
+  console.log("totalExecution: " + totalExecution + "; executed: " + counter + ";");
 
   if (counter) {
     if (counter < totalExecution) {
       if (isAssetsLandingPage()) {
-        sessionStorage.setItem(keyCounter, counter + 1);
         setTimeout(() => {
           executeRefreshRenditions(startsInSeconds);
-        }, 2000); // set to 30 mins each execution
-      } else if (isRefreshRenditionsPage()) {
+        }, 1800000); // set to 30 mins each execution (1800000 milliseconds)
+      } 
+	  else if (isRefreshRenditionsPage()) {
         executeRefreshRenditions(startsInSeconds);
+		sessionStorage.setItem(keyCounter, Number(counter) + 1);
       }
     }
-  } else { // initial execution
+  } 
+  else { // initial execution
     if (isAssetsLandingPage()) {
       sessionStorage.setItem(keyCounter, 0);
       executeRefreshRenditions(startsInSeconds);
@@ -148,8 +154,15 @@ window.addEventListener('load', function(event) {
     var totalAssets = sessionStorage.getItem(keyTotalAssets);
     var startsInSeconds = sessionStorage.getItem(keyStartsInSeconds);
 
-    if (totalAssets > 0 && counter > 0) {
-      runAutomation(total, startsInSeconds);
+    if (totalAssets > 0) {
+      runAutomation(totalAssets, startsInSeconds);
     }
   }
 });
+
+function initAutomation(totalAssets, startsInSeconds) {
+  sessionStorage.removeItem(keyTotalAssets);
+  sessionStorage.removeItem(keyCounter);
+  sessionStorage.removeItem(keyStartsInSeconds);
+  runAutomation(totalAssets, startsInSeconds);
+}
