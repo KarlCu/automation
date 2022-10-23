@@ -3,7 +3,7 @@
 // Sorting: Date modified - ascending (oldest to latest)
 // Filter: 
 //   Asset media: Images; Vectors
-// To execute, type in console: runAutomation({total_number_of_assets}, {number_of_seconds_before_start})
+// To execute, type in console: initAutomation({total_number_of_assets}, {number_of_seconds_before_start})
 //   Example: initAutomation(29653, 5)
 function clearSelection() {
   console.log("clearSelection()");
