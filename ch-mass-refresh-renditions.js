@@ -170,8 +170,8 @@ function runAutomation(totalAssets, startsInSeconds) {
         setTimeout(() => {
           executeRefreshRenditions(startsInSeconds);
         }, 1800000); // set to 30 mins each execution (1800000 milliseconds)
-      } 
-	  else {
+      }
+      else {
         executeRefreshRenditions(startsInSeconds);
 
         if (isRefreshRenditionsPage()) {
@@ -179,7 +179,7 @@ function runAutomation(totalAssets, startsInSeconds) {
         }
       }
     } 
-	else {
+    else {
       console.log("Execution completed!");
     }
   } 
