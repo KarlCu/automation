@@ -5,7 +5,6 @@
 //   Asset media: Images; Vectors
 // To execute, type in console: runAutomation({total_number_of_assets}, {number_of_seconds_before_start})
 //   Example: initAutomation(29653, 5)
-
 function clearSelection() {
   console.log("clearSelection()");
   var btn = document.querySelector('[data-testid="clear-selection"]');
@@ -54,13 +53,29 @@ function untoggleRefreshFailedOnly() {
   }
 }
 
+function clickLoginWithOkta() {
+  console.log("clickLoginWithOkta()");
+  var btn = document.getElementById('SAML');
+  if (btn) {
+    btn.click();
+  }
+}
+
+function submitSignInOkta() {
+  console.log("submitSignInOkta()");
+  var btn = document.getElementById('okta-signin-submit');
+  if (btn) {
+    btn.click();
+  }
+}
+
 function submit() {
   console.log("clickRefreshRenditions()");
   // For testing: 
   // var btn = document.querySelector('[data-bind="click: cancel, text: messages.cancel"]');
   var btn = document.getElementsByClassName('btn-primary');
-  if (btn) {
-    btn.click();
+  if (btn && btn.length > 0) {
+    btn[0].click();
   }
 }
 
@@ -70,6 +85,14 @@ function isAssetsLandingPage() {
 
 function isRefreshRenditionsPage() {
   return window.location.pathname.startsWith("/en-us/massedit/refreshrenditions");
+}
+
+function isLoginPage() {
+  return window.location.pathname == "/en-us/Account";
+}
+
+function isLoginOktaPage() {
+  return window.location.pathname == "/login/login.htm";
 }
 
 function executeRefreshRenditions(startsInSeconds) {
@@ -109,6 +132,19 @@ function executeRefreshRenditions(startsInSeconds) {
       submit();
     }, startsInMilliseconds + 2000);
   }
+
+  // if session times out and redirects to login
+  if (isLoginPage()) {
+    setTimeout(() => {
+      clickLoginWithOkta()();
+    }, startsInMilliseconds);
+  }
+
+  if (isLoginOktaPage()) {
+    setTimeout(() => {
+      submitSignInOkta()();
+    }, startsInMilliseconds);
+  }
 }
 
 var keyTotalAssets = "ch-refresh-renditions-total-assets";
@@ -124,9 +160,9 @@ function runAutomation(totalAssets, startsInSeconds) {
 
   sessionStorage.setItem(keyTotalAssets, totalAssets);
   sessionStorage.setItem(keyStartsInSeconds, startsInSeconds);
-  
+
   var counter = sessionStorage.getItem(keyCounter);
-  console.log("totalExecution: " + totalExecution + "; executed: " + counter + ";");
+  console.log("Total Execution: " + totalExecution + "; Executed: " + counter + ";");
 
   if (counter) {
     if (counter < totalExecution) {
@@ -135,14 +171,21 @@ function runAutomation(totalAssets, startsInSeconds) {
           executeRefreshRenditions(startsInSeconds);
         }, 1800000); // set to 30 mins each execution (1800000 milliseconds)
       } 
-	  else if (isRefreshRenditionsPage()) {
+	  else {
         executeRefreshRenditions(startsInSeconds);
-		sessionStorage.setItem(keyCounter, Number(counter) + 1);
+
+        if (isRefreshRenditionsPage()) {
+          sessionStorage.setItem(keyCounter, Number(counter) + 1);
+        }
       }
+    } 
+	else {
+      console.log("Execution completed!");
     }
   } 
   else { // initial execution
     if (isAssetsLandingPage()) {
+      console.log("Initial execution...");
       sessionStorage.setItem(keyCounter, 0);
       executeRefreshRenditions(startsInSeconds);
     }
@@ -150,13 +193,11 @@ function runAutomation(totalAssets, startsInSeconds) {
 }
 
 window.addEventListener('load', function(event) {
-  if (isAssetsLandingPage() || isRefreshRenditionsPage()) {
-    var totalAssets = sessionStorage.getItem(keyTotalAssets);
-    var startsInSeconds = sessionStorage.getItem(keyStartsInSeconds);
+  var totalAssets = sessionStorage.getItem(keyTotalAssets);
+  var startsInSeconds = sessionStorage.getItem(keyStartsInSeconds);
 
-    if (totalAssets > 0) {
-      runAutomation(totalAssets, startsInSeconds);
-    }
+  if (totalAssets > 0) {
+    runAutomation(totalAssets, startsInSeconds);
   }
 });
 
