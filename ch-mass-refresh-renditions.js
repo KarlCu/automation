@@ -203,7 +203,7 @@ function contAutomation() {
           executeUIProcess();
         }, millisecondsEachExecution);
       }
-	  else {
+      else {
         executeUIProcess();
 
         if (isRefreshRenditionsPage()) {
@@ -211,7 +211,7 @@ function contAutomation() {
         }
       }
     }
-	else {
+    else {
       console.log("Completed!");
       sessionStorage.removeItem(keyTotalAssets);
       sessionStorage.removeItem(keyCounter);
