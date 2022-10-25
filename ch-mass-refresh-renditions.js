@@ -188,6 +188,11 @@ function initAutomation(totalAssets) {
 }
 
 function contAutomation() {
+  if (isLoginPage() || isLoginOktaPage()) {
+    executeUIProcess();
+    return true;
+  }
+  
   var totalAssets = sessionStorage.getItem(keyTotalAssets);
   var totalExecution = Math.ceil(totalAssets / assetsPerExecution) + 1; // add extra 1
   var counter = sessionStorage.getItem(keyCounter);
@@ -215,11 +220,6 @@ function contAutomation() {
       console.log("Completed!");
       sessionStorage.removeItem(keyTotalAssets);
       sessionStorage.removeItem(keyCounter);
-    }
-  }
-  else {
-    if (isLoginPage() || isLoginOktaPage()) {
-      executeUIProcess();
     }
   }
 
