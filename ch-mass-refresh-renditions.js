@@ -8,12 +8,17 @@
 // To continue interrupted execution, type in console: contAutomation()
 
 // Adjust these variables if needed:
-var minutesEachExecution = 30; // Minutes of execution per batch
+var minutesEachExecution = 20; // Minutes of execution per batch
 var secondsToStart = 10; // Seconds to start when page loads
 var isTestingOnly = false; // If testing only, 'Cancel' will be clicked instead of 'Submit'
 
 // Constant for Content Hub:
 var assetsPerExecution = 2000; // Maximum assets per execution, constant of 2000 assets for CH
+
+// Session Storage
+var keyTotalAssets = "ch-refresh-renditions-total-assets";
+var keyCounter = "ch-refresh-renditions-counter";
+var keyStartExecution = "ch-refresh-renditions-start-execution-for-current-branch";
 
 function clearSelection() {
   console.log("clearSelection()");
@@ -103,6 +108,13 @@ function submit() {
   if (btn && btn.length > 0) {
     btn[0].click();
   }
+
+  // increment counter
+  var counter = sessionStorage.getItem(keyCounter);
+  sessionStorage.setItem(keyCounter, Number(counter) + 1);
+  
+  // set execution start date time
+  sessionStorage.setItem(keyStartExecution, Date.now());
 }
 
 function isAssetsLandingPage() {
@@ -176,13 +188,11 @@ function executeUIProcess() {
   }
 }
 
-var keyTotalAssets = "ch-refresh-renditions-total-assets";
-var keyCounter = "ch-refresh-renditions-counter";
-
 function initAutomation(totalAssets) {
   console.log("Initialize...");
   sessionStorage.setItem(keyTotalAssets, totalAssets);
   sessionStorage.setItem(keyCounter, 0);
+  sessionStorage.setItem(keyStartExecution, '');
   executeUIProcess();
   return true;
 }
@@ -202,25 +212,40 @@ function contAutomation() {
 
     if (counter < totalExecution) {
       if (isAssetsLandingPage()) {
-        var millisecondsEachExecution = minutesEachExecution * 1000 * 60;
+        var startExecution = sessionStorage.getItem(keyStartExecution);
+        if (startExecution) {
+          var currDt = new Date(Date.now());
+          var execDt = new Date(Number(startExecution));
+          execDt.setMinutes(execDt.getMinutes() + minutesEachExecution); // projected execution completion
 
-        setTimeout(() => {
+          if (currDt < execDt) {
+            console.log("Remaining minute/s: " + ((execDt - currDt) / 1000 / 60) + " as of " + currDt.toLocaleTimeString());
+
+            setTimeout(() => { // delay the execution to remaining time
+              location.reload(); // refresh page before execution
+            }, execDt - currDt);
+          }
+          else { // curent time is already ahead of projected execution completion
+            executeUIProcess();
+          }
+        }
+        else { // no value for start execution session yet
           executeUIProcess();
-        }, millisecondsEachExecution);
-      }
-      else {
-        executeUIProcess();
-
-        if (isRefreshRenditionsPage()) {
-          sessionStorage.setItem(keyCounter, Number(counter) + 1);
         }
       }
+      else { // non assets landing page
+        executeUIProcess();
+      }
     }
-    else {
+    else { // overall completion
       console.log("Completed!");
       sessionStorage.removeItem(keyTotalAssets);
       sessionStorage.removeItem(keyCounter);
+      sessionStorage.removeItem(keyStartExecution);
     }
+  }
+  else {
+    console.log("Kindly execute 'init'.");
   }
 
   return true;
