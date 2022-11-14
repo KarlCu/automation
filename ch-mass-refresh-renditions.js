@@ -224,18 +224,13 @@ function contAutomation() {
             setTimeout(() => { // delay the execution to remaining time
               location.reload(); // refresh page before execution
             }, execDt - currDt);
-          }
-          else { // curent time is already ahead of projected execution completion
-            executeUIProcess();
+
+            return true;
           }
         }
-        else { // no value for start execution session yet
-          executeUIProcess();
-        }
       }
-      else { // non assets landing page
-        executeUIProcess();
-      }
+      
+      executeUIProcess();
     }
     else { // total execution already achieved
       console.log("Completed!");
