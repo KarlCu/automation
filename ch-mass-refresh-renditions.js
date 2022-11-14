@@ -237,7 +237,7 @@ function contAutomation() {
         executeUIProcess();
       }
     }
-    else { // overall completion
+    else { // total execution already achieved
       console.log("Completed!");
       sessionStorage.removeItem(keyTotalAssets);
       sessionStorage.removeItem(keyCounter);
